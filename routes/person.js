@@ -20,11 +20,12 @@ personRoutes.route("/person").post((req, res) => {
   } else {
     db_connect.collection("people").insertOne(person, function (err, result) {
       if (!err) {
-        res.json(result).send();
+        res.sendStatus(201);
       } else {
         if (err.name === "MongoServerError" && err.code === 11000) {
           res.status(403).send("Duplicate SN");
         } else {
+          console.error(err);
           res.sendStatus(500);
         }
       }
@@ -40,16 +41,20 @@ personRoutes.route("/person").get((req, res) => {
     .find({})
     .project({ _id: 0 })
     .toArray((err, people) => {
-      if (err) throw err;
-      db_connect
-        .collection("devices")
-        .find({})
-        .toArray((err, devices) => {
-          people.forEach((person) => {
-            addDeviceNames(person, devices);
+      if (!err) {
+        db_connect
+          .collection("devices")
+          .find({})
+          .toArray((err, devices) => {
+            people.forEach((person) => {
+              addDeviceNames(person, devices);
+            });
+            res.json(people).status(200).send();
           });
-          res.json(people);
-        });
+      } else {
+        console.error(err);
+        res.sendStatus(500);
+      }
     });
 });
 
@@ -66,14 +71,18 @@ personRoutes.route("/person/:firstname/:lastname").get((req, res) => {
     },
   };
   db_connect.collection("people").findOne(query, options, (err, person) => {
-    if (err) throw err;
-    db_connect
-      .collection("devices")
-      .find()
-      .toArray((err, devices) => {
-        addDeviceNames(person, devices);
-        res.json(person);
-      });
+    if (!err) {
+      db_connect
+        .collection("devices")
+        .find()
+        .toArray((err, devices) => {
+          addDeviceNames(person, devices);
+          res.json(person).status(200).send();
+        });
+    } else {
+      console.error(err);
+      res.sendStatus(500);
+    }
   });
 });
 
@@ -97,14 +106,19 @@ personRoutes.route("/person/:firstname/:lastname").delete((req, res) => {
           },
         },
         (err, result) => {
+          // this is janky, hard to detect if one ot the two transactions fails
           if (err) console.error(err);
         }
       );
     }
   });
   db_connect.collection("people").deleteOne(person_query, (err, result) => {
-    if (err) throw err;
-    res.json(result);
+    if (!err) {
+      res.sendStatus(200);
+    } else {
+      console.error(err);
+      res.sendStatus(500);
+    }
   });
 });
 
@@ -128,11 +142,12 @@ personRoutes.route("/person/:firstname/:lastname").patch((req, res) => {
     .collection("people")
     .updateOne(query, { $set: newPerson }, (err, result) => {
       if (!err) {
-        res.json(result).send();
+        res.sendStatus(200);
       } else {
         if (err.name === "MongoServerError" && err.code === 11000) {
           res.status(403).send("Duplicate SN");
         } else {
+          console.error(err);
           res.sendStatus(500);
         }
       }
@@ -174,11 +189,14 @@ personRoutes
                 },
                 (err, result) => {
                   if (!err) {
-                    res.json(result).send();
+                    res.sendStatus(200);
                     device.loaned = true;
                     db_connect
                       .collection("devices")
                       .replaceOne(device_query, device);
+                  } else {
+                    console.error(err);
+                    res.sendStatus(500);
                   }
                 }
               );
@@ -217,7 +235,7 @@ personRoutes
               },
               (err, result) => {
                 if (!err) {
-                  res.json(result).send();
+                  res.sendStatus(200);
                   db_connect
                     .collection("devices")
                     .findOne(device_query, (err, device) => {
@@ -226,6 +244,9 @@ personRoutes
                         .collection("devices")
                         .replaceOne(device_query, device);
                     });
+                } else {
+                  console.error(err);
+                  res.sendStatus(500);
                 }
               }
             );
