@@ -15,7 +15,7 @@ deviceRoutes.route("/device").get((req, res) => {
     })
     .toArray((err, result) => {
       if (err) throw err;
-      res.json(result);
+      res.json(result).status(200).send();
     });
 });
 
@@ -33,7 +33,7 @@ deviceRoutes.route("/device").post((req, res) => {
     db_connect.collection("devices").insertOne(device, function (err, result) {
       if (!err) {
         // change this to return the device_sn
-        res.json(result).send();
+        res.sendStatus(201);
       } else {
         if (err.name === "MongoServerError" && err.code === 11000) {
           res.status(403).send("Duplicate SN");
@@ -63,7 +63,7 @@ deviceRoutes.route("/device/:sn").get((req, res) => {
     },
     (err, result) => {
       if (err) throw err;
-      res.json(result);
+      res.json(result).status(200).send();
     }
   );
 });
@@ -80,7 +80,7 @@ deviceRoutes.route("/device/:sn").delete((req, res) => {
     );
   db_connect.collection("devices").deleteOne(query, (err, result) => {
     if (err) throw err;
-    res.json(result);
+    res.sendStatus(200);
   });
 });
 
@@ -103,7 +103,7 @@ deviceRoutes.route("/device/:sn").patch((req, res) => {
     .collection("devices")
     .updateOne(query, { $set: new_device }, (err, result) => {
       if (!err) {
-        res.json(result).send();
+        res.sendStatus(201);
       } else {
         if (err.name === "MongoServerError" && err.code === 11000) {
           res.status(403).send("Duplicate SN");
