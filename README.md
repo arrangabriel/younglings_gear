@@ -150,6 +150,7 @@ Operation: DELETE
 Body: n/a
 Result: Deletes the person with firstname = firstname and lastname = lastname. If the person had devices assigned to them their loaned field is set to false.
 ```
+### Edit person
 ```
 Endpoint: /person/firstname/lastname
 Operation: PATCH
