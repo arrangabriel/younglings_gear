@@ -2,8 +2,10 @@
 
 ## Running
 
+Setup [Atlas](https://account.mongodb.com/account)
+
 Edit **config.env.template**
-- Add atlas uri, with credentials
+- Add Atlas uri, with credentials
 - Rename database if needed
 - Remove .template extension
 
