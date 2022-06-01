@@ -5,7 +5,7 @@ const dbo = require("../db_conn");
 require("dotenv").config({ path: "./config.env" });
 
 // TODO investigate addName thing if person was not found
-// TODO respond with better messages
+// TODO respond with better messages on creation and such
 
 // Create person
 personRoutes.route("/person").post((req, res) => {
